@@ -3,7 +3,16 @@
 	url = https://github.com/foundry-rs/forge-std
 [submodule "packages/foundry/lib/openzeppelin-contracts"]
 	path = packages/foundry/lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
 [submodule "packages/foundry/lib/solidity-bytes-utils"]
 	path = packages/foundry/lib/solidity-bytes-utils
 	url = https://github.com/gnsps/solidity-bytes-utils
+[submodule "packages/foundry/lib/foundry-devops"]
+	path = packages/foundry/lib/foundry-devops
+	url = https://github.com/Cyfrin/foundry-devops
+[submodule "packages/foundry/lib/chainlink"]
+	path = packages/foundry/lib/chainlink
+	url = https://github.com/smartcontractkit/chainlink
+[submodule "packages/foundry/lib/ccip"]
+	path = packages/foundry/lib/ccip
+	url = https://github.com/smartcontractkit/ccip
