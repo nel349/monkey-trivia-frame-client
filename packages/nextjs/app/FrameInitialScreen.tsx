@@ -1,6 +1,7 @@
 import { useContext, useMemo, useState } from "react";
 import styles from "./FrameInitialScreen.module.css";
-import { CustomButton, TopicContext } from "monkey-trivia-ui-components";
+import Stack from "@mui/material/Stack";
+import { CustomButton, TextFieldMt, TopicContext } from "monkey-trivia-ui-components";
 
 // import { Card, Container, FileInput, Flex, Input, Loader,
 //      Modal, SegmentedControl, Image, Group, Text,
@@ -16,7 +17,6 @@ import { CustomButton, TopicContext } from "monkey-trivia-ui-components";
 // import { FRAMES_URL } from '../ApiServiceConfig';
 // import FrameInitiaHeader from './FrameHeader';
 // import { login } from '../authentication/Login';
-// import { Web3Auth } from '@web3auth/modal';
 // import React from 'react';
 // import { createFrame } from '../mongo/FrameHandler';
 // import { WaitingScreen } from './components';
@@ -33,7 +33,7 @@ export const FrameInitialScreenUIComponent = () => {
   const { topics } = useContext(TopicContext);
   const [loading, setLoading] = useState(false);
   const [frameSessionCreated, setFrameSessionCreated] = useState(false);
-  // const [web3auth, setWeb3auth] = useState<Web3Auth>();
+  //   const [web3auth, setWeb3auth] = useState<Web3Auth>();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [sellerBasisPoints, setSellerBasisPoints] = useState(5);
@@ -140,20 +140,6 @@ export const FrameInitialScreenUIComponent = () => {
   // Function to generate a URL for the frame session
   // const generateFrameSessionURL = (frameId: string) => {
   //     return `${FRAMES_URL}/trivia/session/${frameId}`;
-  // }
-
-  // const onConnectWalletClicked = async () => {
-  //     const { currentUserPublicKey, web3auth } = await login();
-  //     console.log('currentUserPublicKey: ', currentUserPublicKey);
-
-  //     if (web3auth) {
-  //         setWeb3auth(web3auth);
-  //         console.log('web3auth set!');
-  //         console.log('connected: ', web3auth.connected);
-  //         setConnected(web3auth.connected);
-  //         console.log('connected wallet[0]:', wallets[0].adapter.name);
-  //         // console.log('connected wallet[1]:', wallets[1].adapter.name);
-  //     }
   // }
 
   const onDoneInBuildNftCollection = () => {
@@ -364,143 +350,148 @@ export const FrameInitialScreenUIComponent = () => {
   }
 
   return (
-    <div className={styles.main}></div>
-    //     <FrameInitiaHeader onConnect={onConnectWalletClicked} isConnected={connected} />
-    //     {!loading && !frameSessionCreated ?
-    //     <>
-    //     <Flex
-    //         gap="sm"
-    //         justify="center"
-    //         align="center"
-    //         direction="column"
-    //         w="100%"
-    //         h="auto" // Fixed height
-    //     >
-    //         <Input
-    //             leftSection={<IconPacman />}
-    //             placeholder="Frame Title"
-    //             radius="md"
-    //             styles={{
-    //                 input: {
-    //                     textAlign: 'center',
-    //                     width: '100%',  // Ensure the input field takes up the full width of the div
-    //                     background: '#DAD5D5',
-    //                     opacity: 1,
-    //                     fontFamily: 'umbrage2',
-    //                     fontSize: '32px',
-    //                 },
-    //             }}
-    //             onChange={(e) => setFrameTitle(e.currentTarget.value)}
-    //         />
-
-    //         <Container fluid bg="#FDD673" w="100%" className='container-number-players'>
-    //             Number of Questions
-    //         </Container>
-    //         <SegmentedControl w='100%'
-    //             fullWidth size="xl"
-    //             color="gray"
-    //             value={numberQuestions}
-    //             data={[
-    //                 { value: '1', label: '1' },
-    //                 { value: '5', label: '5' },
-    //                 { value: '10', label: '10' },
-    //             ]}
-    //             onChange={(value) => {
-    //                 setNumberQuestions(value);
-    //             }}
-
-    //             style={{ fontFamily: 'umbrage2', marginBottom: '10px' }}
-    //         />
-    //         <Container fluid bg="#FDD673" w="100%" className='container-number-players'>
-    //             Score requirement to win
-    //         </Container>
-    //         <SegmentedControl w='100%'
-    //             fullWidth size="xl"
-    //             color="gray"
-    //             value={scoreToWin}
-    //             data={[
-    //                 { value: '50', label: '50' },
-    //                 { value: '60', label: '60' },
-    //                 { value: '70', label: '70' },
-    //                 { value: '80', label: '80' },
-    //                 { value: '90', label: '90' }
-    //             ]}
-    //             onChange={(value) => {
-    //                 setScoreToWin(value);
-    //             }}
-
-    //             style={{ fontFamily: 'umbrage2', marginBottom: '10px' }}
-    //         />
-    //         <CustomButton
-    //             fontSize={"24px"}
-    //             onClick={open}
-    //             background='linear-gradient(to bottom right, #FDD673, #D5B45B)'
-    //             color='#2B2C21'
-    //             style={{
-    //                 marginTop: '5px',
-    //                 marginBottom: '5px',
-    //             }}>Pick a topic
-    //         </CustomButton>
-    //         <SelectedTopicEntries
-    //             entrySize={topics.length}
-    //         />
-
-    //         <CustomButton
-    //             fontSize={"24px"}
-    //             onClick={buildNftOpen}
-    //             background='linear-gradient(to bottom right, #FDD673, #D5B45B)'
-    //             color='#2B2C21'
-    //         >Build Nft Collection
-    //         </CustomButton>
-    //         <CustomButton
-    //             onClick={handleCreateFrameSubmitted}
-    //             style={{
-    //                 marginTop: '5%',
-    //                 marginBottom: '5%',
-    //             }}
-    //         >Create Frame
-    //         </CustomButton>
-
-    //         {/* <CustomButton
-    //             onClick={onSignMessageClicked}
-    //             style={{
-    //                 marginTop: '5%',
-    //                 marginBottom: '5%',
-    //             }}
-    //         >Sign Message
-    //         </CustomButton> */}
-
-    //     </Flex>
-    //     <Modal
-    //         yOffset={'5dvh'}
-    //         opened={opened}
-    //         onClose={close}
-    //         radius={'xl'}
-    //         withCloseButton={false}
+    <div className={styles.main}>
+      {!loading && !frameSessionCreated ? (
+        <Stack spacing={3} width={"100%"}>
+          <TextFieldMt label="Frame Title" placeholder={""} onChange={e => console.log(e.currentTarget.value)} />
+        </Stack>
+      ) : null}
+    </div>
+    // {!loading && !frameSessionCreated ?
+    // <>
+    // <Flex
+    //     gap="sm"
+    //     justify="center"
+    //     align="center"
+    //     direction="column"
+    //     w="100%"
+    //     h="auto" // Fixed height
+    // >
+    //     <Input
+    //         leftSection={<IconPacman />}
+    //         placeholder="Frame Title"
+    //         radius="md"
     //         styles={{
-    //             body: { backgroundColor: colors.blue_turquoise },
+    //             input: {
+    //                 textAlign: 'center',
+    //                 width: '100%',  // Ensure the input field takes up the full width of the div
+    //                 background: '#DAD5D5',
+    //                 opacity: 1,
+    //                 fontFamily: 'umbrage2',
+    //                 fontSize: '32px',
+    //             },
     //         }}
-    //     >
-    //     <ChooseTopicComponent
-    //         numberOfQuestions={parseInt(numberQuestions)}
-    //         closeModal={close}
-    //         style={
-    //             {
-    //                 backgroundColor: colors.blue_turquoise,
-    //             }
-    //         }
+    //         onChange={(e) => setFrameTitle(e.currentTarget.value)}
     //     />
-    //     </Modal>
-    //     <BuildNftComponent
-    //         opened={buildNftOpened}
-    //         close={buildNftClose}
-    //         open={buildNftOpen}
-    //         handleFileSelect={handleFileSelect}
-    //     />
-    //     </> : null}
 
-    //     {loading ? <Loader color={colors.yellow} /> : null}
-    //     {frameSessionCreated ? <WaitingScreen url={urlFrame}/> : null}
+    //     <Container fluid bg="#FDD673" w="100%" className='container-number-players'>
+    //         Number of Questions
+    //     </Container>
+    //     <SegmentedControl w='100%'
+    //         fullWidth size="xl"
+    //         color="gray"
+    //         value={numberQuestions}
+    //         data={[
+    //             { value: '1', label: '1' },
+    //             { value: '5', label: '5' },
+    //             { value: '10', label: '10' },
+    //         ]}
+    //         onChange={(value) => {
+    //             setNumberQuestions(value);
+    //         }}
+
+    //         style={{ fontFamily: 'umbrage2', marginBottom: '10px' }}
+    //     />
+    //     <Container fluid bg="#FDD673" w="100%" className='container-number-players'>
+    //         Score requirement to win
+    //     </Container>
+    //     <SegmentedControl w='100%'
+    //         fullWidth size="xl"
+    //         color="gray"
+    //         value={scoreToWin}
+    //         data={[
+    //             { value: '50', label: '50' },
+    //             { value: '60', label: '60' },
+    //             { value: '70', label: '70' },
+    //             { value: '80', label: '80' },
+    //             { value: '90', label: '90' }
+    //         ]}
+    //         onChange={(value) => {
+    //             setScoreToWin(value);
+    //         }}
+
+    //         style={{ fontFamily: 'umbrage2', marginBottom: '10px' }}
+    //     />
+    //     <CustomButton
+    //         fontSize={"24px"}
+    //         onClick={open}
+    //         background='linear-gradient(to bottom right, #FDD673, #D5B45B)'
+    //         color='#2B2C21'
+    //         style={{
+    //             marginTop: '5px',
+    //             marginBottom: '5px',
+    //         }}>Pick a topic
+    //     </CustomButton>
+    //     <SelectedTopicEntries
+    //         entrySize={topics.length}
+    //     />
+
+    //     <CustomButton
+    //         fontSize={"24px"}
+    //         onClick={buildNftOpen}
+    //         background='linear-gradient(to bottom right, #FDD673, #D5B45B)'
+    //         color='#2B2C21'
+    //     >Build Nft Collection
+    //     </CustomButton>
+    //     <CustomButton
+    //         onClick={handleCreateFrameSubmitted}
+    //         style={{
+    //             marginTop: '5%',
+    //             marginBottom: '5%',
+    //         }}
+    //     >Create Frame
+    //     </CustomButton>
+
+    //     {/* <CustomButton
+    //         onClick={onSignMessageClicked}
+    //         style={{
+    //             marginTop: '5%',
+    //             marginBottom: '5%',
+    //         }}
+    //     >Sign Message
+    //     </CustomButton> */}
+
+    // </Flex>
+    // <Modal
+    //     yOffset={'5dvh'}
+    //     opened={opened}
+    //     onClose={close}
+    //     radius={'xl'}
+    //     withCloseButton={false}
+    //     styles={{
+    //         body: { backgroundColor: colors.blue_turquoise },
+    //     }}
+    // >
+    // <ChooseTopicComponent
+    //     numberOfQuestions={parseInt(numberQuestions)}
+    //     closeModal={close}
+    //     style={
+    //         {
+    //             backgroundColor: colors.blue_turquoise,
+    //         }
+    //     }
+    // />
+    // </Modal>
+    // <BuildNftComponent
+    //     opened={buildNftOpened}
+    //     close={buildNftClose}
+    //     open={buildNftOpen}
+    //     handleFileSelect={handleFileSelect}
+    // />
+    // </> : null}
+
+    // {loading ? <Loader color={colors.yellow} /> : null}
+    // {frameSessionCreated ? <WaitingScreen url={urlFrame}/> : null}
   );
 };
 
