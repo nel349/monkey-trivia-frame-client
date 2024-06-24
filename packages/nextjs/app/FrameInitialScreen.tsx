@@ -1,12 +1,13 @@
-import { FormEvent, FormEventHandler, useCallback, useContext, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { search } from "../services/exa";
 import styles from "./FrameInitialScreen.module.css";
 import Stack from "@mui/material/Stack";
 import {
   ChooseTopicModal,
-  CustomButton,
   CustomButton2,
-  DisplayTitle,
+  NftCardBaseItemList,
+  NftCardBaseProps,
+  PickNftModal,
   SegmentedControl,
   SelectedTopicEntries,
   TextFieldMt,
@@ -14,30 +15,68 @@ import {
   TopicProvider,
   colors,
 } from "monkey-trivia-ui-components";
+import { useAccount } from "wagmi";
+import { getNFTsForOwner } from "~~/services/alchemy/NftApi";
 
 export const FrameInitialScreenUIComponent = () => {
   const [loading, setLoading] = useState(false);
   const [frameSessionCreated, setFrameSessionCreated] = useState(false);
   const [frameTitle, setFrameTitle] = useState("");
-  const [collectionName, setCollectionName] = useState("Collection Name");
   const [numberQuestions, setNumberQuestions] = useState("1");
   const { topics } = useContext(TopicContext);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [description, setDescription] = useState("");
-  const [sellerBasisPoints, setSellerBasisPoints] = useState(5);
-  const [connected, setConnected] = useState(false);
   const [urlFrame, setUrlFrame] = useState("");
   const [scoreToWin, setScoreToWin] = useState("50");
 
   const [showTopicModal, setShowTopicModal] = useState(false);
+  const [showNftModal, setShowNftModal] = useState(false);
+  const [nfts, setNfts] = useState<NftCardBaseProps[]>([]);
+  const [nftSelected, setNftSelected] = useState<NftCardBaseProps | null>(null);
+
+  // Get current account
+  const { address } = useAccount();
 
   useEffect(() => {
-    console.log("Selected fields\n--");
-    console.log("frameTitle", frameTitle);
-    console.log("numberQuestions", numberQuestions);
-    console.log("scoreToWin", scoreToWin);
-    console.log("---");
-  }, [frameTitle, numberQuestions, scoreToWin]);
+    console.log("showNftModal", showNftModal);
+
+    if (!address) {
+      return;
+    }
+
+    const _getNFTsForOwner = async () => {
+      const nfts = await getNFTsForOwner(address);
+      return nfts;
+    };
+
+    if (showNftModal) {
+      _getNFTsForOwner().then(nfts => {
+        const t_nfts = nfts.ownedNfts.map((nft: any) => {
+          return {
+            name: nft.name,
+            description: nft.description,
+            tokenType: nft.tokenType,
+            image: {
+              thumbnailUrl: nft.image.thumbnailUrl,
+              originalUrl: nft.image.originalUrl,
+            },
+            attributes: nft.raw.metadata.attributes,
+            tokenId: nft.tokenId,
+            contractAddress: nft.contract.address,
+          } as NftCardBaseProps;
+        });
+        console.log("t_nfts", t_nfts);
+        setNfts(t_nfts);
+      });
+    }
+  }, [showNftModal, address]);
+
+  // useEffect(() => {
+  //   console.log("Selected fields\n--");
+  //   console.log("frameTitle", frameTitle);
+  //   console.log("numberQuestions", numberQuestions);
+  //   console.log("scoreToWin", scoreToWin);
+  //   console.log("topicsChosen", topics);
+  //   console.log("---");
+  // }, [frameTitle, numberQuestions, scoreToWin, topics]);
 
   const handleFrameTitleChange = (e: FormEvent<HTMLDivElement>) => {
     const target = e.target as HTMLInputElement;
@@ -79,9 +118,45 @@ export const FrameInitialScreenUIComponent = () => {
             onClick={() => {
               setShowTopicModal(true);
             }}
-            background={`linear-gradient(to bottom right, ${colors.yellow}, #D5B45B)`}
-            color="#2B2C21"
+            background={`linear-gradient(to bottom right, ${colors.yellow}, ${colors.yellow3})`}
+            color={colors.black}
           />
+
+          <CustomButton2
+            text="Prize NFT Details"
+            fontSize={"2rem"}
+            onClick={() => {
+              setShowNftModal(true);
+            }}
+            background={`linear-gradient(to bottom right, ${colors.yellow}, ${colors.yellow3})`}
+            color={colors.black}
+          />
+
+          <PickNftModal
+            open={showNftModal}
+            onClose={() => {
+              console.log("closed modal");
+              setShowNftModal(false);
+            }}
+            onDone={() => {
+              console.log("done");
+              setShowNftModal(false);
+            }}
+            nfts={nfts}
+            onSelectedIndexChange={(index: number) => {
+              console.log("nft yaaay!", index);
+              console.log("nft selected e: ", nfts[index]);
+              setNftSelected(nfts[index]);
+            }}
+          />
+
+          {
+            // Box showing the selected nft: contract address and token id
+            nftSelected &&
+              NftCardBaseItemList({
+                ...nftSelected,
+              })
+          }
 
           <ChooseTopicModal
             open={showTopicModal}
@@ -90,21 +165,13 @@ export const FrameInitialScreenUIComponent = () => {
               setShowTopicModal(false);
             }}
             numberQuestions={1}
-            onSearch={
-              // async (search: string) => {
-              //   await sleep(1000);
-              //   const data = mockData.slice(0, 10).map((item) => ({ value: item.id, label: item.title }))
-              //   console.log("searching for :", search);
-              //   return data;
-              // }
-              async (topic: string) => {
-                console.log("searching for :", topic);
-                const data = await search(topic);
-                const preparedData = data.slice(0, 10).map(item => ({ value: item.id, label: item.title }));
-                console.log("data", preparedData);
-                return preparedData;
-              }
-            }
+            onSearch={async (topic: string) => {
+              console.log("searching for :", topic);
+              const data = await search(topic);
+              const preparedData = data.slice(0, 10).map(item => ({ value: item.id, label: item.title }));
+              console.log("data", preparedData);
+              return preparedData;
+            }}
           />
 
           <SelectedTopicEntries entrySize={topics.length} />
@@ -112,7 +179,13 @@ export const FrameInitialScreenUIComponent = () => {
           <CustomButton2
             text="Create Frame"
             onClick={() => {
-              console.log("create frame");
+              console.log("Selected fields\n--");
+              console.log("frameTitle", frameTitle);
+              console.log("numberQuestions", numberQuestions);
+              console.log("scoreToWin", scoreToWin);
+              console.log("topicsChosen", topics);
+              console.log("nftSelected", nftSelected);
+              console.log("---");
             }}
             style={{
               marginTop: "5%",
@@ -126,18 +199,10 @@ export const FrameInitialScreenUIComponent = () => {
 };
 
 export const FrameInitialScreen = () => {
-  // devnet endpoint
-
-  // const endpoint = 'https://api.mainnet-beta.solana.com';
-
   return (
-    // <ConnectionProvider endpoint={endpoint}>
-    //     <WalletProvider wallets={wallets} autoConnect>
     <TopicProvider>
       <FrameInitialScreenUIComponent />
     </TopicProvider>
-    // {/* </WalletProvider>
-    // </ConnectionProvider> */}
   );
 };
 
