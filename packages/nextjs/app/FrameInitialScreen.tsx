@@ -1,4 +1,5 @@
 import { FormEvent, FormEventHandler, useCallback, useContext, useEffect, useState } from "react";
+import { search } from "../services/exa";
 import styles from "./FrameInitialScreen.module.css";
 import Stack from "@mui/material/Stack";
 import {
@@ -7,8 +8,10 @@ import {
   CustomButton2,
   DisplayTitle,
   SegmentedControl,
+  SelectedTopicEntries,
   TextFieldMt,
   TopicContext,
+  TopicProvider,
   colors,
 } from "monkey-trivia-ui-components";
 
@@ -94,12 +97,17 @@ export const FrameInitialScreenUIComponent = () => {
               //   console.log("searching for :", search);
               //   return data;
               // }
-              async (search: string) => {
-                console.log("searching for :", search);
-                return [];
+              async (topic: string) => {
+                console.log("searching for :", topic);
+                const data = await search(topic);
+                const preparedData = data.slice(0, 10).map(item => ({ value: item.id, label: item.title }));
+                console.log("data", preparedData);
+                return preparedData;
               }
             }
           />
+
+          <SelectedTopicEntries entrySize={topics.length} />
 
           <CustomButton2
             text="Create Frame"
@@ -125,7 +133,9 @@ export const FrameInitialScreen = () => {
   return (
     // <ConnectionProvider endpoint={endpoint}>
     //     <WalletProvider wallets={wallets} autoConnect>
-    <FrameInitialScreenUIComponent />
+    <TopicProvider>
+      <FrameInitialScreenUIComponent />
+    </TopicProvider>
     // {/* </WalletProvider>
     // </ConnectionProvider> */}
   );
