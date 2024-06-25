@@ -13,6 +13,10 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import { TriviaGameHubTest } from "../contracts/test/harnes/TriviaGameHubTest.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
+import {GameSessionNft} from "../contracts/GameSessionNft.sol";
+import { DeployGameSessionNft } from "../script/DeployGameSessionNft.s.sol";
+
+
 contract MonkeyTriviaHub is StdCheats, Test {
     string constant NFT_NAME = "MonkeyTrivia NFT";
     string constant NFT_SYMBOL = "MTSession";
@@ -27,6 +31,10 @@ contract MonkeyTriviaHub is StdCheats, Test {
 
     MockFunctionsRouter public mockFunctionsRouter;
 
+    //Nft 
+    GameSessionNft public gameSessionNft;
+    DeployGameSessionNft public nftDeployer;
+
 
 
     function setUp() public virtual {
@@ -37,6 +45,9 @@ contract MonkeyTriviaHub is StdCheats, Test {
         deployer = new DeployTriviaGameHub();
         triviaGameHub = deployer.run();
         DEPLOYER_ADDRESS = deployer.getDeployerPubKey();
+
+        nftDeployer = new DeployGameSessionNft();
+        gameSessionNft = nftDeployer.run();
     }
 
     function testCreateGame() public {
@@ -327,4 +338,75 @@ contract MonkeyTriviaHub is StdCheats, Test {
         require(success == false, "Should not be able to fulfill winners if already fulfilled");
     }
 
+    function fullFillWinners() public {
+        vm.prank(triviaGameHub.owner());
+        uint256 requestId = triviaGameHub.requestRandomWords(0);
+
+        // Simulate random words
+        uint256[] memory randomWords = new uint256[](2);
+        randomWords[0] = 23232; // should map to USER
+        randomWords[1] = 11123; // should map to USER4
+
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.testFulfillRandomWords(requestId, randomWords);
+
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.fulfillWinners(requestId);
+    }
+
+    modifier mintNft() {
+        vm.prank(USER);
+        gameSessionNft.mint(USER, "session1");
+        
+        // Check that the balance of the nft is 1
+        require(gameSessionNft.balanceOf(USER) == 1, "NFT should be minted to the user");
+        _;
+    }
+
+    // test for depositing NFT
+    function testDepositNFT() public setupGame mintNft {
+
+        // Approve the contract to transfer the NFT
+        vm.prank(USER);
+        gameSessionNft.approve(address(triviaGameHub), 0);
+
+        // check that the owner is the user
+        require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by the user");
+
+        vm.prank(USER);
+        triviaGameHub.depositNFT(0, address(gameSessionNft), 0);
+
+        // Check that the owner of the nft is the trivia game hub contract
+        require(gameSessionNft.ownerOf(0) == address(triviaGameHub), "NFT should be deposited to the trivia game hub contract");
+    }
+
+    // test for claiming NFT for single winner
+    function testClaimNFT() public setupGameMultipleParticipants mintNft {
+
+        // Approve the contract to transfer the NFT
+        vm.prank(USER);
+        gameSessionNft.approve(address(triviaGameHub), 0);
+
+        vm.prank(USER);
+        triviaGameHub.depositNFT(0, address(gameSessionNft), 0);
+
+        // Check that the owner of the nft is the trivia game hub contract
+        require(gameSessionNft.ownerOf(0) == address(triviaGameHub), "NFT should be deposited to the trivia game hub contract");
+
+        fullFillWinners();
+
+        // end the game
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.endGame(0);
+
+        address[] memory winners = triviaGameHub.getWinners(0);
+        require(winners[0] == USER, "First winner should be the first address");
+
+        vm.prank(USER);
+        triviaGameHub.claimNFT(0);
+
+        // check the owner of the nft is the user
+        require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by the user");
+
+    }
 }

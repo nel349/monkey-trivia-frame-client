@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/utils/Address.sol";
 // import {console} from "forge-std/Test.sol";
 import { TriviaGameVrf } from "./vrf/TriviaGameVrf.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
 
 contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleInterface, Pausable {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -36,6 +38,9 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         mapping(address => bool) s_isParticipant;
         mapping(address => string) scores;
         address[] winners;
+        address nftContract;
+        uint256 nftTokenId;
+        bool nftClaimed;
     }
 
     struct ScoreRequest {
@@ -93,6 +98,45 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         s_secretSlot = secretSlot;
         s_source = source;
         i_subId = subscriptionId;
+    }
+
+    function depositNFT(uint256 _gameId, address _nftContract, uint256 _tokenId) external {
+        require(games[_gameId].creator == msg.sender, "Only the game creator can deposit the NFT.");
+        require(games[_gameId].isActive, "Game is not active.");
+        IERC721(_nftContract).transferFrom(msg.sender, address(this), _tokenId);
+        games[_gameId].nftContract = _nftContract;
+        games[_gameId].nftTokenId = _tokenId;
+        games[_gameId].nftClaimed = false;
+    }
+
+
+    function claimNFT(uint256 _gameId) external {
+        require(games[_gameId].isActive == false, "Game is still active.");
+        require(games[_gameId].nftClaimed == false, "NFT already claimed.");
+        require(games[_gameId].winners.length > 0, "No winners found.");
+        
+        // check if the winner is the sender. iterate through the winners array
+        bool isWinner = false;
+        for (uint256 i = 0; i < games[_gameId].winners.length; i++) {
+            if (games[_gameId].winners[i] == msg.sender) {
+                isWinner = true;
+                break;
+            }
+        }
+
+        require(isWinner, "You are not a winner.");
+
+        IERC721(games[_gameId].nftContract).transferFrom(address(this), msg.sender, games[_gameId].nftTokenId);
+        games[_gameId].nftClaimed = true;
+    }
+
+    function reclaimNFT(uint256 _gameId) external {
+        require(games[_gameId].creator == msg.sender, "Only the game creator can reclaim the NFT.");
+        require(games[_gameId].isActive == false, "Game is still active.");
+        require(games[_gameId].nftClaimed == false, "NFT already claimed.");
+
+        IERC721(games[_gameId].nftContract).transferFrom(address(this), msg.sender, games[_gameId].nftTokenId);
+        games[_gameId].nftClaimed = true;
     }
 
     modifier isParticipant(uint256 _gameId, address participant) {
