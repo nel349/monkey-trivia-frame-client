@@ -20,6 +20,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
 
     error UnexpectedRequestID(bytes32 requestId);
     error GameDoesNotExist(uint256 gameId);
+    error ParticipantAlreadyInGame(uint256 gameId, address participant);
     error Raffle__UpkeepNotNeeded();
     event Response(bytes32 indexed requestId, bytes response, bytes err);
     event CheckedUpkeep(
@@ -344,8 +345,8 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
 
         // Check if the participant is already in the game
         if (games[_gameId].s_isParticipant[msg.sender] == true) {
-            revert GameDoesNotExist(_gameId);
-        } 
+            revert ParticipantAlreadyInGame(_gameId, msg.sender);
+        }
         games[_gameId].participants.push(msg.sender);
         games[_gameId].s_isParticipant[msg.sender] = true;
     }
