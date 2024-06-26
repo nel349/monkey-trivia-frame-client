@@ -52,6 +52,8 @@ contract HelperConfig is Script {
             activeNetworkConfig = getBaseTestnetConfig();
         } else if (block.chainid == 421614) {
             activeNetworkConfig = getArbitrumSepoliaConfig();
+        } else if (block.chainid == 8453) {
+            activeNetworkConfig = getBaseMainnetConfig();
         }
         else {
             _setupAnvilConfig();
@@ -239,6 +241,22 @@ contract HelperConfig is Script {
         // ccipRouterMock = new MockCCIPRouter();
         linkTokenMock = new MockLinkToken();
         return getAnvilEthConfig();
+    }
+
+    function getBaseMainnetConfig() internal returns (NetworkConfig memory) {
+        return NetworkConfig({
+            link: 0x88Fb150BDc53A65fe94Dea0c9BA0a6dAf8C6e196,
+            functionsRouter: 0xf9B8fc078197181C841c296C876945aaa425B278,
+            donId: 0x66756e2d626173652d6d61696e6e65742d310000000000000000000000000000,
+            subId: 17,
+            ccipRouter: 0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846,
+            ccipChainSelector: 1,
+            secretVersion: 0,
+            secretSlot: 0,
+            vrfCoordinator: 0x5CE8D5A2BC84beb22a398CCA51996F7930313D61,
+            vrfSubscription: 0,
+            deployerKey: vm.envUint("PRIVATE_KEY")
+        });
     }
 
 }

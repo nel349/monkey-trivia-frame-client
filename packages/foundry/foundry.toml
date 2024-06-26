@@ -22,6 +22,7 @@ sepolia = { key = "${ETHERSCAN_API_KEY}" }
 mumbai = { key = "${POLYGONSCAN_API_KEY}" }
 baseSepolia = { key = "{BASESCAN_API_KEY}"}
 arbitrumSepolia = { key = "{ARBITRUMSCAN_API_KEY}"}
+baseMainnet = { key = "{BASESCAN_API_KEY}"}
 
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
@@ -29,5 +30,6 @@ mumbai = "${MUMBAI_RPC_URL}"
 fuji = "${FUJI_RPC_URL}"
 baseSepolia = "${BASE_SEPOLIA_RPC_URL}"
 arbitrumSepolia = "${ARBITRUM_RPC_URL}"
+baseMainnet = "${BASE_MAINNET_RPC_URL}"
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

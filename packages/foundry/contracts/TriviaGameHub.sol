@@ -217,6 +217,21 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         emit VrfRequestFulfilled(_requestId, _gameId);
     }
 
+    // This is an alternate fulfillWinner getting random number from service
+    // Single winner only
+    function fulfillWinnerMt(
+        uint256 _gameId,
+        uint256 winnerIndex
+    ) external onlyOwner {
+        require(games[_gameId].isActive == false, "Game is still active.");
+        require(games[_gameId].participants.length > 0, "No participants found.");
+        require(games[_gameId].winners.length == 0, "Winners already found.");
+        require(winnerIndex < games[_gameId].participants.length, "Winner index out of bounds");
+        
+        games[_gameId].winners.push(games[_gameId].participants[winnerIndex]);
+    }
+
+
     function fulfillWinners(
         uint256 _requestId
     ) external onlyOwner {

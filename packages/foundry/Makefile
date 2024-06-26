@@ -55,6 +55,10 @@ ifeq ($(findstring --network arbitrumSepolia,$(ARGS)),--network arbitrumSepolia)
     NETWORK_ARGS := --fork-url $(ARBITRUM_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast  --verify --etherscan-api-key $(ARBITRUMSCAN_API_KEY) -vv
 endif
 
+ifeq ($(findstring --network baseMainnet,$(ARGS)),--network baseMainnet)
+    NETWORK_ARGS := --fork-url $(BASE_MAINNET_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast  --verify --etherscan-api-key $(BASESCAN_API_KEY) -vv
+endif
+
 deploy:
 	@forge script script/DeployBasicNft.s.sol:DeployBasicNft $(NETWORK_ARGS)
 

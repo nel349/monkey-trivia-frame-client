@@ -17,7 +17,7 @@ contract DeployTriviaGameHub is Script {
     uint256 public DEFAULT_ANVIL_PRIVATE_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
     uint256 public deployerKey;
 
-    uint64 public constant subscriptionId = 39;
+    uint64 public constant subscriptionId = 17;
 
     function run() external returns (TriviaGameHubTest) {
         if (block.chainid == 31337) {
@@ -42,24 +42,29 @@ contract DeployTriviaGameHub is Script {
 
         // uint256 vrf_subId = 39;
         // address vrfCoordinator = networkConfig.vrfCoordinator;
-        
-        AddConsumer addConsumer = new AddConsumer();
-        
-        if (networkConfig.vrfSubscription == 0) {
-            CreateSubscription createSubscription = new CreateSubscription();
 
-            (networkConfig.vrfSubscription, networkConfig.vrfCoordinator) = createSubscription.createSubscription(
-                networkConfig.vrfCoordinator,
-                deployerKey
-            );
+        // if base not baseMainnet
+        AddConsumer addConsumer;
+        if (block.chainid == 31337) {
+        
+            addConsumer = new AddConsumer();
+            if (networkConfig.vrfSubscription == 0) {
+                CreateSubscription createSubscription = new CreateSubscription();
 
-            FundSubscription fundSubscription = new FundSubscription();
-            fundSubscription.fundSubscription(
-                networkConfig.vrfCoordinator,
-                networkConfig.vrfSubscription,
-                networkConfig.link,
-                deployerKey
-            );
+                (networkConfig.vrfSubscription, networkConfig.vrfCoordinator) = createSubscription.createSubscription(
+                    networkConfig.vrfCoordinator,
+                    deployerKey
+                );
+
+                FundSubscription fundSubscription = new FundSubscription();
+                fundSubscription.fundSubscription(
+                    networkConfig.vrfCoordinator,
+                    networkConfig.vrfSubscription,
+                    networkConfig.link,
+                    deployerKey
+                );
+            }
+
         }
 
         vm.startBroadcast(deployerKey);
@@ -75,13 +80,15 @@ contract DeployTriviaGameHub is Script {
         );
         vm.stopBroadcast();
 
-                // We already have a broadcast in here
-        addConsumer.addConsumer(
-            address(_contract),
-            networkConfig.vrfCoordinator,
-            networkConfig.vrfSubscription,
-            deployerKey
-        );
+    
+        if (block.chainid == 31337) {
+            addConsumer.addConsumer(
+                address(_contract),
+                networkConfig.vrfCoordinator,
+                networkConfig.vrfSubscription,
+                deployerKey
+            );
+        }
         return _contract;
     }
 

@@ -409,4 +409,34 @@ contract MonkeyTriviaHub is StdCheats, Test {
         require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by the user");
 
     }
+
+    function testFulfillWinnersMt() public setupGameMultipleParticipants mintNft {
+        
+          // Approve the contract to transfer the NFT
+        vm.prank(USER);
+        gameSessionNft.approve(address(triviaGameHub), 0);
+
+        vm.prank(USER);
+        triviaGameHub.depositNFT(0, address(gameSessionNft), 0);
+
+        // Check that the owner of the nft is the trivia game hub contract
+        require(gameSessionNft.ownerOf(0) == address(triviaGameHub), "NFT should be deposited to the trivia game hub contract");
+
+        
+        // end the game
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.endGame(0);
+
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.fulfillWinnerMt(0, 0);
+
+        address[] memory winners = triviaGameHub.getWinners(0);
+        require(winners[0] == USER, "First winner should be the first address");
+
+        vm.prank(USER);
+        triviaGameHub.claimNFT(0);
+
+        // check the owner of the nft is the user
+        require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by the user");
+    }
 }
