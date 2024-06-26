@@ -428,15 +428,40 @@ contract MonkeyTriviaHub is StdCheats, Test {
         triviaGameHub.endGame(0);
 
         vm.prank(triviaGameHub.owner());
-        triviaGameHub.fulfillWinnerMt(0, 0);
+        triviaGameHub.fulfillWinnerMt(0, 1); // gameId, winnerIndex
 
         address[] memory winners = triviaGameHub.getWinners(0);
-        require(winners[0] == USER, "First winner should be the first address");
+        require(winners[0] == USER2, "First winner should be the first address");
 
-        vm.prank(USER);
+        vm.prank(USER2);
         triviaGameHub.claimNFT(0);
 
+        // check the owner of the nft is the user2
+        require(gameSessionNft.ownerOf(0) == USER2, "NFT should be owned by the user2");
+    }
+
+    // test for reclaiming NFT
+    function testReclaimNFT() public setupGameMultipleParticipants mintNft {
+          // Approve the contract to transfer the NFT
+        vm.prank(USER);
+        gameSessionNft.approve(address(triviaGameHub), 0);
+
+        vm.prank(USER);
+        triviaGameHub.depositNFT(0, address(gameSessionNft), 0);
+
+        // Check that the owner of the nft is the trivia game hub contract
+        require(gameSessionNft.ownerOf(0) == address(triviaGameHub), "NFT should be deposited to the trivia game hub contract");
+
+        
+        // end the game
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.endGame(0);
+
+        vm.prank(USER);
+        triviaGameHub.reclaimNFT(0);
+
         // check the owner of the nft is the user
-        require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by the user");
+        require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by USER");
+
     }
 }
