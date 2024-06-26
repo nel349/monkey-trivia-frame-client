@@ -21,4 +21,4 @@ node_modules
 
 # cli
 dist
-packages/foundry/*
+packages/foundry/broadcast/*
