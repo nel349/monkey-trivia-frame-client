@@ -16,7 +16,9 @@ import {
   colors,
 } from "monkey-trivia-ui-components";
 import { useAccount } from "wagmi";
+import { CircularProgressWithAvatar } from "~~/components/CircularProgress";
 import { getNFTsForOwner } from "~~/services/alchemy/NftApi";
+import { createFrame } from "~~/services/mongo";
 
 export const FrameInitialScreenUIComponent = () => {
   const [loading, setLoading] = useState(false);
@@ -84,8 +86,57 @@ export const FrameInitialScreenUIComponent = () => {
     setFrameTitle(target.value);
   };
 
+  const handleCreateFrame = async () => {
+    setLoading(true);
+
+    // wait 1 second as test
+    // await new Promise(resolve => setTimeout(resolve, 2000));
+
+    if (topics.length === 0 || !topics[0]?.metaphor_id) {
+      alert("Please select a topic");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // check contract address and token id
+      if (!nftSelected?.contractAddress || !nftSelected?.tokenId) {
+        alert("Please select a NFT");
+        setLoading(false);
+        return;
+      }
+
+      // Create the frame
+      const { frame } = await createFrame({
+        name: frameTitle,
+        numberOfQuestions: parseInt(numberQuestions),
+        topic: {
+          name: topics[0]?.name,
+          metaphor_id: topics[0]?.metaphor_id,
+        },
+        scoreToPass: parseInt(scoreToWin),
+        token_nft: {
+          address: nftSelected?.contractAddress,
+          token_id: nftSelected?.tokenId,
+        },
+      });
+      console.log("frame: ", frame);
+      // // console.log('questions: ', questions);
+      // const frameSessionURL = generateFrameSessionURL(frame._id);
+
+      // const warpcastUrl = createWarpcastLink("Play a game with Monkey Trivia!", [frameSessionURL]);
+      // setUrlFrame(warpcastUrl);
+      setFrameSessionCreated(true);
+    } catch (error) {
+      console.error(error);
+      // alert('An error occurred while creating the frame');
+    }
+    setLoading(false);
+  };
+
   return (
     <div className={styles.main}>
+      {loading && <CircularProgressWithAvatar></CircularProgressWithAvatar>}
       {!loading && !frameSessionCreated ? (
         <Stack spacing={3} width={"70%"} alignItems="center">
           {TextFieldMt({
@@ -186,6 +237,9 @@ export const FrameInitialScreenUIComponent = () => {
               console.log("topicsChosen", topics);
               console.log("nftSelected", nftSelected);
               console.log("---");
+
+              // Lets create the frame
+              handleCreateFrame();
             }}
             style={{
               marginTop: "5%",

@@ -1,4 +1,5 @@
-@media (min-width: 767px) {
+/* This media query will apply when the viewport width is 767px or more */
+@media (min-width: 767px) { 
     .main {
         background-image: url('./assets/in-game-bg-peppermint-1920x1080.png');
         background-size: cover; /* or use "100% 100%" to stretch the image */
@@ -6,14 +7,14 @@
         background-position: center;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         padding: 6rem;
         min-height: 100vh;
     }
   }
   
-  /* This media query will apply when the viewport width is 430px or more */
+  /* This media query will apply when the viewport width is 767px or less */
   @media (max-width: 767px) {
     .main {
         background-image: url('./assets/sign-in-screen-430x932.png');
@@ -22,7 +23,7 @@
         background-position: center;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         
         min-height: 100vh;
