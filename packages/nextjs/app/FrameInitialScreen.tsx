@@ -13,11 +13,14 @@ import {
   TextFieldMt,
   TopicContext,
   TopicProvider,
+  WaitingScreen,
   colors,
+  createWarpcastLink,
 } from "monkey-trivia-ui-components";
 import { useAccount } from "wagmi";
 import { CircularProgressWithAvatar } from "~~/components/CircularProgress";
 import { getNFTsForOwner } from "~~/services/alchemy/NftApi";
+import { FRAMES_URL } from "~~/services/configs";
 import { createFrame } from "~~/services/mongo";
 
 export const FrameInitialScreenUIComponent = () => {
@@ -122,10 +125,20 @@ export const FrameInitialScreenUIComponent = () => {
       });
       console.log("frame: ", frame);
       // // console.log('questions: ', questions);
-      // const frameSessionURL = generateFrameSessionURL(frame._id);
 
-      // const warpcastUrl = createWarpcastLink("Play a game with Monkey Trivia!", [frameSessionURL]);
-      // setUrlFrame(warpcastUrl);
+      const generateFrameSessionURL = (frameId: string) => {
+        return `${FRAMES_URL}?frameId=${frameId}&gamePhase=initial`;
+      };
+
+      const frameSessionURL = generateFrameSessionURL(frame._id);
+
+      const warpcastUrl = createWarpcastLink("Play a game with Monkey Trivia!", [frameSessionURL]);
+
+      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=667cdb65e7d4dddbd4ea5b1d&gamePhase=initial
+      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
+      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://d857-2600-100f-a101-9e22-598e-623f-f200-2e08.ngrok-free.app?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
+
+      setUrlFrame(warpcastUrl);
       setFrameSessionCreated(true);
     } catch (error) {
       console.error(error);
@@ -136,6 +149,7 @@ export const FrameInitialScreenUIComponent = () => {
 
   return (
     <div className={styles.main}>
+      {!loading && frameSessionCreated && <WaitingScreen url={urlFrame} />}
       {loading && <CircularProgressWithAvatar></CircularProgressWithAvatar>}
       {!loading && !frameSessionCreated ? (
         <Stack spacing={3} width={"70%"} alignItems="center">

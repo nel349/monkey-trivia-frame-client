@@ -2219,7 +2219,7 @@ __metadata:
     eslint-config-next: ~14.0.4
     eslint-config-prettier: ~8.5.0
     eslint-plugin-prettier: ~4.2.1
-    monkey-trivia-ui-components: 1.0.25
+    monkey-trivia-ui-components: 1.0.26
     next: ~14.0.4
     next-themes: ~0.2.1
     nprogress: ~0.2.0
@@ -4448,6 +4448,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"classnames@npm:^2.3.2":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: da424a8a6f3a96a2e87d01a432ba19315503294ac7e025f9fece656db6b6a0f7b5003bb1fbb51cbb0d9624d964f1b9bb35a51c73af9b2434c7b292c42231c1e5
+  languageName: node
+  linkType: hard
+
 "clean-stack@npm:^2.0.0":
   version: 2.2.0
   resolution: "clean-stack@npm:2.2.0"
@@ -4884,6 +4891,15 @@ __metadata:
   dependencies:
     ms: ^2.1.1
   checksum: 1e681f5cce94ba10f8dde74b20b42e4d8cf0d2a6700f4c165bb3bb6885565ef5ca5885bf07e704974a835f2415ff095a63164f539988a1f07e8a69fe8b1d65ad
+  languageName: node
+  linkType: hard
+
+"debug@npm:^2.1.3":
+  version: 2.6.9
+  resolution: "debug@npm:2.6.9"
+  dependencies:
+    ms: 2.0.0
+  checksum: d2f51589ca66df60bf36e1fa6e4386b318c3f1e06772280eea5b1ae9fd3d05e9c2b7fd8a7d862457d00853c75b00451aa2d7459b924629ee385287a650f58fe6
   languageName: node
   linkType: hard
 
@@ -7747,6 +7763,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonp@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "jsonp@npm:0.2.1"
+  dependencies:
+    debug: ^2.1.3
+  checksum: 90aabd9deb3a9ba83aedf8d40e1aaff1fc29f3f3fe42985a661782498dde526a7cd9b7bec4b8721f7d0beafab9e5ccfdafd46640f7dd6c58d529a6bb5238e2b8
+  languageName: node
+  linkType: hard
+
 "jsx-ast-utils@npm:^2.4.1 || ^3.0.0, jsx-ast-utils@npm:^3.3.5":
   version: 3.3.5
   resolution: "jsx-ast-utils@npm:3.3.5"
@@ -8355,9 +8380,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monkey-trivia-ui-components@npm:1.0.25":
-  version: 1.0.25
-  resolution: "monkey-trivia-ui-components@npm:1.0.25"
+"monkey-trivia-ui-components@npm:1.0.26":
+  version: 1.0.26
+  resolution: "monkey-trivia-ui-components@npm:1.0.26"
   dependencies:
     "@coinbase/wallet-sdk": ^4.0.3
     "@emotion/react": ^11.11.4
@@ -8367,13 +8392,14 @@ __metadata:
     "@tabler/icons-react": ^3.5.0
     "@tanstack/react-query": ^5.45.1
     react-router-dom: ^6.23.1
+    react-share: ^5.1.0
     viem: ^2.13.6
     wagmi: ^2.9.8
   peerDependencies:
     "@types/react": ^18.2.79
     react: ^18.2.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: 320612a8e3d67ee3603c02c4a0d7833f96eadb0f3e4aceffbc0a8ea9a7068086ecd243d4dd78e4bf41a765555bded4b90f886691ce9bb622afa3877a777eed48
+  checksum: d62407deeff32a6bc1820e0e76a4b6f1f65c5180477da34be426bf7776c204a0dce7d485392ce599b5c28b1e4685d8b4a50e7d4a2e3b5e67b93271a2dacd6427
   languageName: node
   linkType: hard
 
@@ -8395,6 +8421,13 @@ __metadata:
   version: 1.2.0
   resolution: "mri@npm:1.2.0"
   checksum: 83f515abbcff60150873e424894a2f65d68037e5a7fcde8a9e2b285ee9c13ac581b63cfc1e6826c4732de3aeb84902f7c1e16b7aff46cd3f897a0f757a894e85
+  languageName: node
+  linkType: hard
+
+"ms@npm:2.0.0":
+  version: 2.0.0
+  resolution: "ms@npm:2.0.0"
+  checksum: 0e6a22b8b746d2e0b65a430519934fefd41b6db0682e3477c10f60c76e947c4c0ad06f63ffdf1d78d335f83edee8c0aa928aa66a36c7cd95b69b26f468d527f4
   languageName: node
   linkType: hard
 
@@ -9702,6 +9735,18 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: d5d43ccb908a95d2b7345f2a13315c38bf094e25bcf97d5a6c3f353b1ea88602de15726c3570cd7f07c53b19a3519af2b6739bf6929ec355012795611d739cff
+  languageName: node
+  linkType: hard
+
+"react-share@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "react-share@npm:5.1.0"
+  dependencies:
+    classnames: ^2.3.2
+    jsonp: ^0.2.1
+  peerDependencies:
+    react: ^17 || ^18
+  checksum: c20c84b6ad203504f1bf83db63810793619f5b6ae63834960e7f441a5eeff8a3955894353f67c2d897470e24b75694b63b54d007764d4ee133150dbea6c0fe5b
   languageName: node
   linkType: hard
 
