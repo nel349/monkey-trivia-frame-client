@@ -165,7 +165,7 @@ contract HelperConfig is Script {
             ccipChainSelector: 10344971235874465080,
             secretVersion: 0, // fill in!
             secretSlot: 0, // fill in!
-            vrfCoordinator: address(0),
+            vrfCoordinator: 0x5CE8D5A2BC84beb22a398CCA51996F7930313D61,
             vrfSubscription: 0,
             deployerKey: vm.envUint("PRIVATE_KEY")
         });
@@ -243,7 +243,7 @@ contract HelperConfig is Script {
         return getAnvilEthConfig();
     }
 
-    function getBaseMainnetConfig() internal returns (NetworkConfig memory) {
+    function getBaseMainnetConfig() internal view returns (NetworkConfig memory) {
         return NetworkConfig({
             link: 0x88Fb150BDc53A65fe94Dea0c9BA0a6dAf8C6e196,
             functionsRouter: 0xf9B8fc078197181C841c296C876945aaa425B278,

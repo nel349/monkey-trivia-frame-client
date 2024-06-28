@@ -25,6 +25,10 @@ update:; forge update
 
 build:; forge build
 
+# Lets add a copy of the TriviaGameHub.sol to the assets in the nextjs folder for the UI to use
+build_with_abi:; forge build && cp -r $(CURDIR)/out/TriviaGameHub.sol ../nextjs/abis
+
+
 test :; forge test 
 
 snapshot :; forge snapshot

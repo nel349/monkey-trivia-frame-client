@@ -29,6 +29,18 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         bool hasPlayers, 
         uint256 blockTimestamp 
     );
+    event GameCreated(uint256 indexed gameId, uint256 startTime, uint256 endTime);
+    event ParticipantJoinedGame(uint256 indexed gameId, address indexed participant);
+    event GameEnded(uint256 indexed gameId);
+    event WinnerFulfilled(uint256 indexed gameId, uint256 indexed winnerIndex);
+    event NFTClaimed(uint256 indexed gameId, address indexed winner);
+    event NFTReclaimed(uint256 indexed gameId, address indexed winner);
+    event NFTDeposited(
+        uint256 indexed gameId, 
+        address indexed nftContract, 
+        uint256 tokenId, 
+        address indexed depositor
+    );
 
     struct Game {
         address creator;
@@ -108,6 +120,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         games[_gameId].nftContract = _nftContract;
         games[_gameId].nftTokenId = _tokenId;
         games[_gameId].nftClaimed = false;
+        emit NFTDeposited(_gameId, _nftContract, _tokenId, msg.sender);
     }
 
 
@@ -129,6 +142,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
 
         IERC721(games[_gameId].nftContract).transferFrom(address(this), msg.sender, games[_gameId].nftTokenId);
         games[_gameId].nftClaimed = true;
+        emit NFTClaimed(_gameId, msg.sender);
     }
 
     function reclaimNFT(uint256 _gameId) external {
@@ -138,6 +152,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
 
         IERC721(games[_gameId].nftContract).transferFrom(address(this), msg.sender, games[_gameId].nftTokenId);
         games[_gameId].nftClaimed = true;
+        emit NFTReclaimed(_gameId, msg.sender);
     }
 
     modifier isParticipant(uint256 _gameId, address participant) {
@@ -230,6 +245,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         require(winnerIndex < games[_gameId].participants.length, "Winner index out of bounds");
         
         games[_gameId].winners.push(games[_gameId].participants[winnerIndex]);
+        emit WinnerFulfilled(_gameId, winnerIndex);
     }
 
 
@@ -287,8 +303,6 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
             
         }
 
-        
-
         return (upkeepNeeded, performData); // can we comment this out?
     }
 
@@ -303,16 +317,6 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         );
 
         emit CheckedUpkeep(isActive, timePassed, hasPlayers, block_t);
-        // (bool upkeepNeeded, ) = checkUpkeep("");
-        // require(upkeepNeeded, "Upkeep not needed");
-        // if (!upkeepNeeded) {
-        //     revert Raffle__UpkeepNotNeeded();
-        // }
-        // for (uint256 i = 0; i < nextGameId; i++) {
-        //     if (games[i].isActive && block.timestamp > games[i].endTime && games[i].participants.length > 0) {
-        //         endGame(i);
-        //     }
-        // }
     }
 
     function createGame(uint256 _startTime, uint256 _endTime) public {
@@ -326,6 +330,9 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         newGame.isActive = true;
         newGame.participants = new address[](0);
         newGame.winners = new address[](0);
+
+        emit GameCreated(nextGameId, _startTime, _endTime);
+
         nextGameId++;
     }
 
@@ -349,6 +356,8 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         }
         games[_gameId].participants.push(msg.sender);
         games[_gameId].s_isParticipant[msg.sender] = true;
+
+        emit ParticipantJoinedGame(_gameId, msg.sender);
     }
 
     function endGame(uint256 _gameId) public {
@@ -360,6 +369,8 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         // Further logic to handle score calculation and rewards can be added here.
 
         // rewardWinners(_gameId);
+
+        emit GameEnded(_gameId);
     }
 
     function pause() external onlyOwner {

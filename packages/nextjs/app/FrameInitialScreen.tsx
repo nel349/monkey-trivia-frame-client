@@ -1,4 +1,5 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
+import jsonAbi from "../abis/TriviaGameHub.sol/TriviaGameHub.json";
 import { search } from "../services/exa";
 import styles from "./FrameInitialScreen.module.css";
 import Stack from "@mui/material/Stack";
@@ -17,8 +18,13 @@ import {
   colors,
   createWarpcastLink,
 } from "monkey-trivia-ui-components";
+import { AbiItem } from "viem";
 import { useAccount } from "wagmi";
 import { CircularProgressWithAvatar } from "~~/components/CircularProgress";
+import { CoinBaseWriteBatchActionAsyncButton } from "~~/components/coinbase/CoinBaseWriteBatchActionAsyncButton";
+// import { CoinBaseWriteBatchActionAsyncButton } from "~~/components/coinbase/CoinBaseWriteBatchActionAsyncButton";
+import { CoinBaseWriteBatchActionButton } from "~~/components/coinbase/CoinBaseWriteBatchActionButton";
+import { PAYMASTER_URL } from "~~/services/CoinbaseServiceConfigs";
 import { getNFTsForOwner } from "~~/services/alchemy/NftApi";
 import { FRAMES_URL } from "~~/services/configs";
 import { createFrame } from "~~/services/mongo";
@@ -136,7 +142,7 @@ export const FrameInitialScreenUIComponent = () => {
 
       // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=667cdb65e7d4dddbd4ea5b1d&gamePhase=initial
       // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
-      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://d857-2600-100f-a101-9e22-598e-623f-f200-2e08.ngrok-free.app?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
+      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://d857-2600-100f-a101-9e22-598e-623f-f200-2e08.ngrok-free.app/api/frame?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
 
       setUrlFrame(warpcastUrl);
       setFrameSessionCreated(true);
@@ -241,7 +247,7 @@ export const FrameInitialScreenUIComponent = () => {
 
           <SelectedTopicEntries entrySize={topics.length} />
 
-          <CustomButton2
+          {/* <CustomButton2
             text="Create Frame"
             onClick={() => {
               console.log("Selected fields\n--");
@@ -259,6 +265,24 @@ export const FrameInitialScreenUIComponent = () => {
               marginTop: "5%",
               marginBottom: "5%",
             }}
+          /> */}
+          <CoinBaseWriteBatchActionAsyncButton
+            handleReceipts={receipts => {
+              console.log("receipt hash: ", receipts[0].transactionHash);
+
+              // handle create frame
+              handleCreateFrame();
+            }}
+            text="Create Frame"
+            contractActions={[
+              {
+                address: "0xB29849cA492bF0B07Df7E9c03780334a1961044e",
+                abi: jsonAbi.abi as AbiItem[],
+                functionName: "createGameWithInterval",
+                args: [3600], // inteval should be 1 hour for now in seconds
+              },
+            ]}
+            paymasterUrl={PAYMASTER_URL()}
           />
         </Stack>
       ) : null}
