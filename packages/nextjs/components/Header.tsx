@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CoinbaseWalletSDK } from "@coinbase/wallet-sdk";
-import { CoinbaseCreateWalletButton } from "monkey-trivia-ui-components";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
-import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+import { FaucetButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
-import { CHAIN_ID } from "~~/services/CoinbaseServiceConfigs";
 
 type HeaderMenuLink = {
   label: string;
@@ -55,24 +53,44 @@ export const HeaderMenuLinks = () => {
   );
 };
 
-const sdk = new CoinbaseWalletSDK({
-  appName: "Monkey Trivia",
-  appLogoUrl: "https://bafkreiamixpftrzntr2mxskev2vc5s7wnokr3hzhi3cz2pyh42p6n6zgv4.ipfs.nftstorage.link",
-  appChainIds: [CHAIN_ID()],
-});
+// const sdk = new CoinbaseWalletSDK({
+//   appName: "Monkey Trivia",
+//   appLogoUrl: "https://bafkreiamixpftrzntr2mxskev2vc5s7wnokr3hzhi3cz2pyh42p6n6zgv4.ipfs.nftstorage.link",
+//   appChainIds: [CHAIN_ID()],
+// });
 
-const provider = sdk.makeWeb3Provider();
+// const provider = sdk.makeWeb3Provider();
 
+const CoinbaseCreateWalletButton = dynamic(
+  () => import("monkey-trivia-ui-components").then(mod => mod.CoinbaseCreateWalletButton),
+  { ssr: false },
+);
 /**
  * Site header
  */
 export const Header = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [provider, setProvider] = useState<any>(null);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
   useOutsideClick(
     burgerMenuRef,
     useCallback(() => setIsDrawerOpen(false), []),
   );
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const { CoinbaseWalletSDK } = require("@coinbase/wallet-sdk");
+      const { CHAIN_ID } = require("~~/services/CoinbaseServiceConfigs");
+
+      const sdk = new CoinbaseWalletSDK({
+        appName: "Monkey Trivia",
+        appLogoUrl: "https://bafkreiamixpftrzntr2mxskev2vc5s7wnokr3hzhi3cz2pyh42p6n6zgv4.ipfs.nftstorage.link",
+        appChainIds: [CHAIN_ID()],
+      });
+
+      setProvider(sdk.makeWeb3Provider());
+    }
+  }, []);
 
   return (
     <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
 import { Stack } from "@mui/joy";
+import QRCodeStyling from "@solana/qr-code-styling";
 import { CustomButton2, DisplayTitle, ShareModal, colors } from "monkey-trivia-ui-components";
-import QRCodeStyling from "qr-code-styling";
 
 type WaitingScreenProps = {
   url: string;
@@ -13,7 +13,7 @@ export const WaitingScreen = ({ url }: WaitingScreenProps) => {
   const openShareModal = () => setShareModalOpen(true);
   const closeShareModal = () => setShareModalOpen(false);
   const urlRef = useRef("");
-  const ref = useRef(null); //qr code ref
+  const ref = useRef<HTMLDivElement>(null);
 
   const qrCode = useMemo(
     () =>
@@ -24,8 +24,8 @@ export const WaitingScreen = ({ url }: WaitingScreenProps) => {
         data: "",
         image: "https://cryptologos.cc/logos/chimpion-bnana-logo.svg",
         dotsOptions: {
-          color: "#4267b2",
-          type: "rounded",
+          color: colors.black,
+          type: "square",
         },
         backgroundOptions: {
           color: "#e9ebee",
@@ -34,27 +34,43 @@ export const WaitingScreen = ({ url }: WaitingScreenProps) => {
           crossOrigin: "anonymous",
           margin: 5,
         },
+        margin: 10,
         cornersDotOptions: {
-          color: colors.darkYellow,
-          type: "dot",
+          color: colors.black,
+          type: "square",
         },
       }),
     [],
   );
 
   useEffect(() => {
+    if (ref.current) {
+      // Clear the existing QR code
+      ref.current.innerHTML = "";
+      // Append the new QR code
+      qrCode.append(ref.current);
+    }
+  }, [qrCode]);
+
+  useEffect(() => {
     urlRef.current = url;
     qrCode.update({
       data: url,
     });
-    console.log("qrCode URL to share: ", url);
-    if (ref.current) {
-      qrCode.append(ref.current);
-    }
   }, [qrCode, url]);
 
   return (
-    <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
+    <Stack
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+      spacing={3}
+      sx={{
+        background: colors.black,
+        borderRadius: "1rem",
+        padding: "2rem",
+      }}
+    >
       <DisplayTitle text={"Waiting for others to join"} fontSize="2rem" background={colors.yellow} />
       <div ref={ref} onClick={openShareModal} />
       <CustomButton2
