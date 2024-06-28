@@ -2218,7 +2218,7 @@ __metadata:
     eslint-config-next: ~14.0.4
     eslint-config-prettier: ~8.5.0
     eslint-plugin-prettier: ~4.2.1
-    monkey-trivia-ui-components: 1.0.28
+    monkey-trivia-ui-components: 1.0.30
     next: ~14.0.4
     next-themes: ~0.2.1
     nprogress: ~0.2.0
@@ -8399,9 +8399,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monkey-trivia-ui-components@npm:1.0.28":
-  version: 1.0.28
-  resolution: "monkey-trivia-ui-components@npm:1.0.28"
+"monkey-trivia-ui-components@npm:1.0.30":
+  version: 1.0.30
+  resolution: "monkey-trivia-ui-components@npm:1.0.30"
   dependencies:
     "@coinbase/wallet-sdk": ^4.0.3
     "@emotion/react": ^11.11.4
@@ -8418,7 +8418,7 @@ __metadata:
     "@types/react": ^18.2.79
     react: ^18.2.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: 9a09aa881c109b47b03c54b8779b2c59834b296b6b0d157c6293e35576b2a23c1a5966495bdc5ea3b062a8a7cf9fd4299a490004a39ab243c9be1b8f2216cd15
+  checksum: 76ee8ee9cdced2af88ca608413369a15a5bcdaf1411d03270595d75ed364b229347513aafa0696c40524afb9b13706019d4dcc2bf671e09b5adca7ea6152b00f
   languageName: node
   linkType: hard
 

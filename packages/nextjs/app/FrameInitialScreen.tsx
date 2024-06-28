@@ -1,3 +1,5 @@
+"use client";
+
 import { FormEvent, useContext, useEffect, useState } from "react";
 import jsonAbi from "../abis/TriviaGameHub.sol/TriviaGameHub.json";
 import { search } from "../services/exa";
@@ -14,7 +16,6 @@ import {
   TextFieldMt,
   TopicContext,
   TopicProvider,
-  WaitingScreen,
   colors,
   createWarpcastLink,
 } from "monkey-trivia-ui-components";
@@ -22,6 +23,7 @@ import { AbiItem, WalletCallReceipt } from "viem";
 import { useAccount } from "wagmi";
 import { CircularProgressWithAvatar } from "~~/components/CircularProgress";
 import { CoinBaseWriteBatchActionAsyncButton } from "~~/components/coinbase/CoinBaseWriteBatchActionAsyncButton";
+import { WaitingScreen } from "~~/components/waiting";
 import { PAYMASTER_URL } from "~~/services/CoinbaseServiceConfigs";
 import { getNFTsForOwner } from "~~/services/alchemy/NftApi";
 import { FRAMES_URL } from "~~/services/configs";
