@@ -96,24 +96,13 @@ export const FrameInitialScreenUIComponent = () => {
   };
 
   const handleCreateFrame = async () => {
-    setLoading(true);
+    // setLoading(true);
 
     // wait 1 second as test
     // await new Promise(resolve => setTimeout(resolve, 2000));
 
-    if (topics.length === 0 || !topics[0]?.metaphor_id) {
-      alert("Please select a topic");
-      setLoading(false);
-      return;
-    }
-
     try {
       // check contract address and token id
-      if (!nftSelected?.contractAddress || !nftSelected?.tokenId) {
-        alert("Please select a NFT");
-        setLoading(false);
-        return;
-      }
 
       // Create the frame
       const { frame } = await createFrame({
@@ -125,8 +114,8 @@ export const FrameInitialScreenUIComponent = () => {
         },
         scoreToPass: parseInt(scoreToWin),
         token_nft: {
-          address: nftSelected?.contractAddress,
-          token_id: nftSelected?.tokenId,
+          address: nftSelected?.contractAddress || "",
+          token_id: nftSelected?.tokenId || "",
         },
       });
       console.log("frame: ", frame);
@@ -267,16 +256,35 @@ export const FrameInitialScreenUIComponent = () => {
             }}
           /> */}
           <CoinBaseWriteBatchActionAsyncButton
+            preRun={() => {
+              if (frameTitle === "") {
+                alert("Please set a frame title");
+                return false;
+              }
+
+              if (topics.length === 0 || !topics[0]?.metaphor_id) {
+                alert("Please select a topic");
+                return false;
+              }
+
+              if (!nftSelected?.contractAddress || !nftSelected?.tokenId) {
+                alert("Please select a NFT");
+                return false;
+              }
+              return true;
+            }}
+            postRun={async () => {
+              // setLoading(true);
+              await handleCreateFrame();
+              // setLoading(false);
+            }}
             handleReceipts={receipts => {
               console.log("receipt hash: ", receipts[0].transactionHash);
-
-              // handle create frame
-              handleCreateFrame();
             }}
             text="Create Frame"
             contractActions={[
               {
-                address: "0xB29849cA492bF0B07Df7E9c03780334a1961044e",
+                address: "0xfa284c39815A8eC2780C1BB13AB2a709DDe11834",
                 abi: jsonAbi.abi as AbiItem[],
                 functionName: "createGameWithInterval",
                 args: [3600], // inteval should be 1 hour for now in seconds

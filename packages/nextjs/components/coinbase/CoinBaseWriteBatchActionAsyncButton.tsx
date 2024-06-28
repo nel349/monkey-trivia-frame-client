@@ -16,6 +16,8 @@ interface CoinBaseWriteBatchActionAsyncButtonProps {
   contractActions?: WriteContractParameters[];
   paymasterUrl?: string;
   handleReceipts?: (receipts: WalletCallReceipt<bigint, "success" | "reverted">[]) => void; // Updated type
+  preRun?: () => boolean;
+  postRun?: () => void;
 }
 
 export function CoinBaseWriteBatchActionAsyncButton({
@@ -25,6 +27,8 @@ export function CoinBaseWriteBatchActionAsyncButton({
   contractActions,
   paymasterUrl,
   handleReceipts,
+  preRun,
+  postRun,
 }: CoinBaseWriteBatchActionAsyncButtonProps) {
   const { data: id, writeContractsAsync } = useWriteContracts();
   const { data: callsStatus } = useCallsStatus({
@@ -45,6 +49,12 @@ export function CoinBaseWriteBatchActionAsyncButton({
   });
 
   const writeAction = useCallback(async () => {
+    const canRun = preRun && preRun();
+    if (!canRun) {
+      alert("Precheck failed");
+      return;
+    }
+
     try {
       if (!contractActions || contractActions.length === 0) {
         throw new Error("No contract action provided");
@@ -64,8 +74,12 @@ export function CoinBaseWriteBatchActionAsyncButton({
       });
     } catch (error) {
       handleError && handleError(error as Error);
+    } finally {
+      if (canRun) {
+        postRun && postRun();
+      }
     }
-  }, [handleSuccess, handleError, contractActions, writeContractsAsync, paymasterUrl]);
+  }, [handleSuccess, handleError, contractActions, writeContractsAsync, paymasterUrl, postRun]);
 
   return (
     <>
