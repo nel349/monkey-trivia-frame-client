@@ -121,6 +121,7 @@ export const Header = () => {
             console.log("error: ", error);
           }}
           provider={provider}
+          fontSize="1rem"
         />
         <FaucetButton />
       </div>

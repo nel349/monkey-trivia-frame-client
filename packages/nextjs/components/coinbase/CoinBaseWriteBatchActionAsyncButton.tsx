@@ -15,9 +15,9 @@ interface CoinBaseWriteBatchActionAsyncButtonProps {
   text: string;
   contractActions?: WriteContractParameters[];
   paymasterUrl?: string;
-  handleReceipts?: (receipts: WalletCallReceipt<bigint, "success" | "reverted">[]) => void; // Updated type
   preRun?: () => boolean;
   postRun?: () => void;
+  setTransactionReceipt?: (receipt: WalletCallReceipt<bigint, "success" | "reverted">) => void;
 }
 
 export function CoinBaseWriteBatchActionAsyncButton({
@@ -26,10 +26,11 @@ export function CoinBaseWriteBatchActionAsyncButton({
   text,
   contractActions,
   paymasterUrl,
-  handleReceipts,
   preRun,
   postRun,
+  setTransactionReceipt,
 }: CoinBaseWriteBatchActionAsyncButtonProps) {
+  const receiptsHandled = false;
   const { data: id, writeContractsAsync } = useWriteContracts();
   const { data: callsStatus } = useCallsStatus({
     id: id as string,
@@ -40,7 +41,9 @@ export function CoinBaseWriteBatchActionAsyncButton({
         if (data.state.data?.status === "CONFIRMED" && data.state.data?.receipts) {
           console.log("callsStatus", data.state.data);
           console.log("callsStatus receipts", data.state.data?.receipts);
-          handleReceipts && handleReceipts(data.state.data.receipts);
+          if (setTransactionReceipt) {
+            setTransactionReceipt(data.state.data?.receipts[0]);
+          }
           return false;
         }
         return 1000;

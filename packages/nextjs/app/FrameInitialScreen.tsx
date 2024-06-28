@@ -18,12 +18,10 @@ import {
   colors,
   createWarpcastLink,
 } from "monkey-trivia-ui-components";
-import { AbiItem } from "viem";
+import { AbiItem, WalletCallReceipt } from "viem";
 import { useAccount } from "wagmi";
 import { CircularProgressWithAvatar } from "~~/components/CircularProgress";
 import { CoinBaseWriteBatchActionAsyncButton } from "~~/components/coinbase/CoinBaseWriteBatchActionAsyncButton";
-// import { CoinBaseWriteBatchActionAsyncButton } from "~~/components/coinbase/CoinBaseWriteBatchActionAsyncButton";
-import { CoinBaseWriteBatchActionButton } from "~~/components/coinbase/CoinBaseWriteBatchActionButton";
 import { PAYMASTER_URL } from "~~/services/CoinbaseServiceConfigs";
 import { getNFTsForOwner } from "~~/services/alchemy/NftApi";
 import { FRAMES_URL } from "~~/services/configs";
@@ -42,6 +40,10 @@ export const FrameInitialScreenUIComponent = () => {
   const [showNftModal, setShowNftModal] = useState(false);
   const [nfts, setNfts] = useState<NftCardBaseProps[]>([]);
   const [nftSelected, setNftSelected] = useState<NftCardBaseProps | null>(null);
+  const [transactionReceipt, setTransactionReceipt] = useState<WalletCallReceipt<
+    bigint,
+    "success" | "reverted"
+  > | null>(null);
 
   // Get current account
   const { address } = useAccount();
@@ -80,30 +82,36 @@ export const FrameInitialScreenUIComponent = () => {
     }
   }, [showNftModal, address]);
 
-  // useEffect(() => {
-  //   console.log("Selected fields\n--");
-  //   console.log("frameTitle", frameTitle);
-  //   console.log("numberQuestions", numberQuestions);
-  //   console.log("scoreToWin", scoreToWin);
-  //   console.log("topicsChosen", topics);
-  //   console.log("---");
-  // }, [frameTitle, numberQuestions, scoreToWin, topics]);
+  useEffect(() => {
+    async function createFrame() {
+      console.log("receipt hash: ", transactionReceipt?.transactionHash);
+
+      // get the topic 1 which is indexed as gameId from the receipts
+      const topic = transactionReceipt?.logs[1].topics[1];
+
+      if (!topic) {
+        console.error("No topic found in receipt");
+        return;
+      }
+      // console.log("topic", topic);
+      const gameId = BigInt(topic).toString(10);
+      // console.log("gameId:", gameId);
+
+      await handleCreateFrame(gameId);
+
+      setFrameSessionCreated(true);
+    }
+
+    createFrame();
+  }, [transactionReceipt]);
 
   const handleFrameTitleChange = (e: FormEvent<HTMLDivElement>) => {
     const target = e.target as HTMLInputElement;
-    console.log("target", target.value);
     setFrameTitle(target.value);
   };
 
-  const handleCreateFrame = async () => {
-    // setLoading(true);
-
-    // wait 1 second as test
-    // await new Promise(resolve => setTimeout(resolve, 2000));
-
+  const handleCreateFrame = async (gameId: string) => {
     try {
-      // check contract address and token id
-
       // Create the frame
       const { frame } = await createFrame({
         name: frameTitle,
@@ -117,8 +125,9 @@ export const FrameInitialScreenUIComponent = () => {
           address: nftSelected?.contractAddress || "",
           token_id: nftSelected?.tokenId || "",
         },
+        game_id: gameId,
       });
-      console.log("frame: ", frame);
+      // console.log("frame: ", frame);
       // // console.log('questions: ', questions);
 
       const generateFrameSessionURL = (frameId: string) => {
@@ -134,7 +143,7 @@ export const FrameInitialScreenUIComponent = () => {
       // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://d857-2600-100f-a101-9e22-598e-623f-f200-2e08.ngrok-free.app/api/frame?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
 
       setUrlFrame(warpcastUrl);
-      setFrameSessionCreated(true);
+      // setFrameSessionCreated(true);
     } catch (error) {
       console.error(error);
       // alert('An error occurred while creating the frame');
@@ -204,8 +213,8 @@ export const FrameInitialScreenUIComponent = () => {
             }}
             nfts={nfts}
             onSelectedIndexChange={(index: number) => {
-              console.log("nft yaaay!", index);
-              console.log("nft selected e: ", nfts[index]);
+              // console.log("nft yaaay!", index);
+              // console.log("nft selected e: ", nfts[index]);
               setNftSelected(nfts[index]);
             }}
           />
@@ -235,26 +244,6 @@ export const FrameInitialScreenUIComponent = () => {
           />
 
           <SelectedTopicEntries entrySize={topics.length} />
-
-          {/* <CustomButton2
-            text="Create Frame"
-            onClick={() => {
-              console.log("Selected fields\n--");
-              console.log("frameTitle", frameTitle);
-              console.log("numberQuestions", numberQuestions);
-              console.log("scoreToWin", scoreToWin);
-              console.log("topicsChosen", topics);
-              console.log("nftSelected", nftSelected);
-              console.log("---");
-
-              // Lets create the frame
-              handleCreateFrame();
-            }}
-            style={{
-              marginTop: "5%",
-              marginBottom: "5%",
-            }}
-          /> */}
           <CoinBaseWriteBatchActionAsyncButton
             preRun={() => {
               if (frameTitle === "") {
@@ -273,14 +262,7 @@ export const FrameInitialScreenUIComponent = () => {
               }
               return true;
             }}
-            postRun={async () => {
-              // setLoading(true);
-              await handleCreateFrame();
-              // setLoading(false);
-            }}
-            handleReceipts={receipts => {
-              console.log("receipt hash: ", receipts[0].transactionHash);
-            }}
+            setTransactionReceipt={setTransactionReceipt}
             text="Create Frame"
             contractActions={[
               {

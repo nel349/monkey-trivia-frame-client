@@ -1,7 +1,7 @@
 import { BASE_SERVICE_URL } from "../configs";
 import axios from "axios";
 
-interface FrameData {
+export interface FrameData {
   name: string;
   numberOfQuestions: number;
   topic: {
@@ -13,14 +13,18 @@ interface FrameData {
     address: string;
     token_id: string;
   };
+  game_id: string;
 }
 
-export const createFrame = async (data: FrameData) => {
+const postFrameData = async (endpoint: string, data: FrameData) => {
   try {
-    const response = await axios.post(`${BASE_SERVICE_URL}/api/frames/createFrame`, data);
+    const response = await axios.post(`${BASE_SERVICE_URL}/api/frames/${endpoint}`, data);
     return response.data;
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
+
+export const createFrame = (data: FrameData) => postFrameData("createFrame", data);
+export const updateFrame = (data: FrameData) => postFrameData("update", data);
