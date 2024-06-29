@@ -117,6 +117,10 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
     function depositNFT(uint256 _gameId, address _nftContract, uint256 _tokenId) external {
         require(games[_gameId].creator == msg.sender, "Only the game creator can deposit the NFT.");
         require(games[_gameId].isActive, "Game is not active.");
+
+        // check game is not expired
+        require(block.timestamp < games[_gameId].endTime, "Game has expired.");
+
         IERC721(_nftContract).transferFrom(msg.sender, address(this), _tokenId);
         games[_gameId].nftContract = _nftContract;
         games[_gameId].nftTokenId = _tokenId;
@@ -126,7 +130,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
 
 
     function claimNFT(uint256 _gameId) external {
-        require(games[_gameId].isActive == false, "Game is still active.");
+        require(block.timestamp > games[_gameId].endTime || games[_gameId].isActive == false, "Game should be active or expired.");
         require(games[_gameId].nftClaimed == false, "NFT already claimed.");
         require(games[_gameId].winners.length > 0, "No winners found.");
         
@@ -452,5 +456,26 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
     // get winners
     function getWinners(uint256 gameId) public view returns (address[] memory) {
         return games[gameId].winners;
+    }
+
+    // get all expired games
+    function getExpiredGames() public view returns (uint256[] memory) {
+    uint256 count = 0;
+    for (uint256 i = 0; i < nextGameId; i++) {
+        if (block.timestamp > games[i].endTime) {
+            count++;
+        }
+    }
+
+    uint256[] memory expiredGames = new uint256[](count);
+    uint256 index = 0;
+    for (uint256 i = 0; i < nextGameId; i++) {
+        if (block.timestamp > games[i].endTime) {
+            expiredGames[index] = i;
+            index++;
+        }
+    }
+
+        return expiredGames;
     }
 }

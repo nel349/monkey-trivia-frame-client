@@ -467,4 +467,36 @@ contract MonkeyTriviaHub is StdCheats, Test {
         require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by USER");
 
     }
+
+    // Test get all expired games
+    function testGetExpiredGames() public setupGameMultipleParticipants {
+        vm.prank(triviaGameHub.owner());
+        uint256[] memory expiredGames = triviaGameHub.getExpiredGames();
+        require(expiredGames.length == 0, "There should be 0 expired games");
+    }
+
+    // Test get all expired games with actual expired games
+    function testGetExpiredGamesWithActualExpiredGames() public setupGameMultipleParticipants {
+        uint256 endtimeExpired = block.timestamp + 1;
+        vm.startPrank(triviaGameHub.owner());
+        triviaGameHub.createGame(block.timestamp, endtimeExpired);
+        triviaGameHub.createGame(block.timestamp, endtimeExpired);
+        triviaGameHub.createGame(block.timestamp, endtimeExpired);
+        triviaGameHub.createGame(block.timestamp, block.timestamp + 3600);
+        vm.stopPrank();
+
+        // skip time
+        vm.warp(block.timestamp + 3500);
+
+        vm.prank(triviaGameHub.owner());
+        uint256[] memory expiredGames = triviaGameHub.getExpiredGames();
+
+        console.log("Expired games: ", expiredGames[0], expiredGames[1], expiredGames[2]);
+
+        require(expiredGames.length == 3, "There should be 3 expired games");
+
+        require(expiredGames[0] == 1, "First expired game should be 1");
+        require(expiredGames[1] == 2, "Second expired game should be 2");
+        require(expiredGames[2] == 3, "Third expired game should be 3");
+    }
 }
