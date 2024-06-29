@@ -271,7 +271,7 @@ export const FrameInitialScreenUIComponent = () => {
                 address: "0xfa284c39815A8eC2780C1BB13AB2a709DDe11834",
                 abi: jsonAbi.abi as AbiItem[],
                 functionName: "createGameWithInterval",
-                args: [3600], // inteval should be 1 hour for now in seconds
+                args: [3600 * 24], // interval should be 1 day in seconds
               },
             ]}
             paymasterUrl={PAYMASTER_URL()}

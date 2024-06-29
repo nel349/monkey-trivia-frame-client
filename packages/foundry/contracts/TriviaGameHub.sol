@@ -41,6 +41,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         uint256 tokenId, 
         address indexed depositor
     );
+    event Score(uint256 indexed gameId, address indexed participant, uint256 score);
 
     struct Game {
         address creator;
@@ -345,7 +346,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         createGame(block.timestamp, block.timestamp + 3600);
     }
 
-    function joinGame(uint256 _gameId) public {
+    function joinGame(uint256 _gameId, uint256 _score) public {
         require(games[_gameId].isActive, "Game is not active.");
         require(block.timestamp >= games[_gameId].startTime, "Game has not started yet.");
         require(block.timestamp <= games[_gameId].endTime, "Game has already ended.");
@@ -356,8 +357,10 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         }
         games[_gameId].participants.push(msg.sender);
         games[_gameId].s_isParticipant[msg.sender] = true;
+        games[_gameId].scores[msg.sender] = _score.toString();
 
         emit ParticipantJoinedGame(_gameId, msg.sender);
+        emit Score(_gameId, msg.sender, _score);
     }
 
     function endGame(uint256 _gameId) public {

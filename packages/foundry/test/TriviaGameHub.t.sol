@@ -75,11 +75,14 @@ contract MonkeyTriviaHub is StdCheats, Test {
 
         triviaGameHub.createGame(startTime, endTime);
 
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 100);
 
         address[] memory participants = triviaGameHub.getGameParticipants(0);
         require(participants.length == 1, "There should be 1 participant");
         require(participants[0] == address(this), "Participant should be this contract");
+
+        string memory score = triviaGameHub.getGameParticipantScore(0, address(this));
+        require(keccak256(abi.encodePacked(score)) == keccak256(abi.encodePacked("100")), "Score should be 100");
     }
 
     function testJoinNonExistentGame() public {
@@ -122,7 +125,7 @@ contract MonkeyTriviaHub is StdCheats, Test {
         uint256 endTime = startTime + 3600; // 1 hour later
 
         triviaGameHub.createGame(startTime, endTime);
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 100);
 
         (bool success,) = address(triviaGameHub).call(abi.encodeWithSignature("joinGame(uint256)", 0));
         require(success == false, "Should not be able to join a game twice");
@@ -175,7 +178,7 @@ contract MonkeyTriviaHub is StdCheats, Test {
 
         vm.startPrank(USER);
         triviaGameHub.createGame(startTime, endTime);
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 100);
         vm.stopPrank();
 
         _;
@@ -279,18 +282,18 @@ contract MonkeyTriviaHub is StdCheats, Test {
 
         vm.startPrank(USER);
         triviaGameHub.createGame(startTime, endTime);
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 100);
         vm.stopPrank();
 
 
         vm.prank(USER2);
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 90);
 
         vm.prank(USER3);
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 80);
 
         vm.prank(USER4);
-        triviaGameHub.joinGame(0);
+        triviaGameHub.joinGame(0, 70);
         _;
     }
 
