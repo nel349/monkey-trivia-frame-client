@@ -140,9 +140,9 @@ export const FrameInitialScreenUIComponent = () => {
 
       const warpcastUrl = createWarpcastLink("Play a game with Monkey Trivia!", [frameSessionURL]);
 
-      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=667cdb65e7d4dddbd4ea5b1d&gamePhase=initial
-      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
-      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://d857-2600-100f-a101-9e22-598e-623f-f200-2e08.ngrok-free.app/api/frame?frameId=667ce170e7d4dddbd4ea5b21&gamePhase=initial
+      // https://warpcast.com/~/compose?text=Play%20a%20game%20with%20Monkey%20Trivia!&embeds[]=https://on-chain-summer2024-frames.vercel.app?frameId=668050e73e89dcad72b1c41d&gamePhase=initial
+      // https://on-chain-summer2024-frames.vercel.app?frameId=668050e73e89dcad72b1c41d&gamePhase=initial
+      // https://8cb9-2600-100f-a103-4c55-f829-f3c5-21d9-a8a5.ngrok-free.app?frameId=668050e73e89dcad72b1c41d&gamePhase=initial
 
       setUrlFrame(warpcastUrl);
       // setFrameSessionCreated(true);
@@ -268,7 +268,7 @@ export const FrameInitialScreenUIComponent = () => {
             text="Create Frame"
             contractActions={[
               {
-                address: "0xfa284c39815A8eC2780C1BB13AB2a709DDe11834",
+                address: "0xDbC42E022E1efcBC741Ba0f4aDDA1E954D39e7A1",
                 abi: jsonAbi.abi as AbiItem[],
                 functionName: "createGameWithInterval",
                 args: [3600 * 24], // interval should be 1 day in seconds

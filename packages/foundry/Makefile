@@ -98,3 +98,18 @@ deployTriviaGameHub:
 
 deployAndPrepareForTesting:
 	@forge script script/Interactions.s.sol:PrepareForTesting $(NETWORK_ARGS)
+
+createGame:
+	@forge script script/InteractionsGame.s.sol:CreateGame $(NETWORK_ARGS)
+
+joinGame:
+	@forge script script/InteractionsGame.s.sol:JoinGame --fork-url $(BASE_SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) \
+	 --broadcast -- --env GAME_ID=$(GAME_ID) -- --env SCORE=$(SCORE)
+
+joinGame1:
+	@forge script script/InteractionsGame.s.sol:JoinGame --fork-url $(BASE_SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY_M1) \
+	 --broadcast -- --env GAME_ID=$(GAME_ID) -- --env SCORE=$(SCORE)
+
+joinGame2:
+	@forge script script/InteractionsGame.s.sol:JoinGame --fork-url $(BASE_SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY_M2) \
+	--broadcast -- --env GAME_ID=$(GAME_ID) -- --env SCORE=$(SCORE)

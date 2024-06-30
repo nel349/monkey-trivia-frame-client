@@ -81,8 +81,8 @@ contract MonkeyTriviaHub is StdCheats, Test {
         require(participants.length == 1, "There should be 1 participant");
         require(participants[0] == address(this), "Participant should be this contract");
 
-        string memory score = triviaGameHub.getGameParticipantScore(0, address(this));
-        require(keccak256(abi.encodePacked(score)) == keccak256(abi.encodePacked("100")), "Score should be 100");
+        uint256 score = triviaGameHub.getGameParticipantScore(0, address(this));
+        require(score == 100, "Score should be 100");
     }
 
     function testJoinNonExistentGame() public {
@@ -270,9 +270,9 @@ contract MonkeyTriviaHub is StdCheats, Test {
         triviaGameHub.testFulfillRequest(requestId, response);
         vm.stopPrank();
 
-        string memory actual = triviaGameHub.getGameParticipantScore(0, USER);
+        uint256 actual = triviaGameHub.getGameParticipantScore(0, USER);
         // console.log("Actual: ", actual);
-        require(keccak256(abi.encodePacked(actual)) == keccak256(abi.encodePacked("3111")), "Score should be 3111");
+        require(actual == 3111, "Score should be 3111");
     
     }
 
@@ -431,16 +431,16 @@ contract MonkeyTriviaHub is StdCheats, Test {
         triviaGameHub.endGame(0);
 
         vm.prank(triviaGameHub.owner());
-        triviaGameHub.fulfillWinnerMt(0, 1); // gameId, winnerIndex
+        triviaGameHub.fulfillWinnerMt(0); // gameId, winnerIndex
 
         address[] memory winners = triviaGameHub.getWinners(0);
-        require(winners[0] == USER2, "First winner should be the first address");
+        require(winners[0] == USER, "First winner should be the USER address");
 
-        vm.prank(USER2);
+        vm.prank(USER);
         triviaGameHub.claimNFT(0);
 
         // check the owner of the nft is the user2
-        require(gameSessionNft.ownerOf(0) == USER2, "NFT should be owned by the user2");
+        require(gameSessionNft.ownerOf(0) == USER, "NFT should be owned by USER");
     }
 
     // test for reclaiming NFT
@@ -498,5 +498,50 @@ contract MonkeyTriviaHub is StdCheats, Test {
         require(expiredGames[0] == 1, "First expired game should be 1");
         require(expiredGames[1] == 2, "Second expired game should be 2");
         require(expiredGames[2] == 3, "Third expired game should be 3");
+    }
+
+    // Test fullfill winners for all expired games
+    function testFulfillWinnersForAllExpiredGames() public {
+
+        // create a for loop with with 10 different users
+        for (uint256 i = 0; i < 10; i++) {
+            uint256 startTime = block.timestamp;
+            uint256 endTime = startTime + 3600; // 1 hour later
+
+            vm.startPrank(address(uint160(i)));
+            triviaGameHub.createGame(startTime, endTime);
+            vm.stopPrank();
+            for (uint256 j = 0; j < 10; j++) {
+                vm.prank(address(uint160(j)));
+                triviaGameHub.joinGame(i, j * 10); // gameId, score
+            }
+        }
+        uint256 game_id = 9;
+        address participant = address(9);
+        console.log("participant with game id 9: ", triviaGameHub.getGameParticipantScore(game_id, participant));
+        console.log("participant with game id 5 and address 1: ", triviaGameHub.getGameParticipantScore(5, address(1)));
+
+        require(triviaGameHub.getGameParticipantScore(game_id, participant) == 90, "Participant with game id 9 should have score 90");
+        require(triviaGameHub.getGameParticipantScore(5, address(1)) == 10, "Participant with game id 5 and address 1 should have score 10");
+        require(triviaGameHub.getGameParticipantScore(5, address(2)) == 20, "Participant with game id 5 and address 2 should have score 20");
+        require(triviaGameHub.getGameParticipantScore(5, address(3)) == 30, "Participant with game id 5 and address 3 should have score 30");
+        require(triviaGameHub.getGameParticipantScore(6, address(4)) == 40, "Participant with game id 6 and address 4 should have score 40");
+        require(triviaGameHub.getGameParticipantScore(6, address(5)) == 50, "Participant with game id 6 and address 5 should have score 50");
+
+        uint256[] memory gameIds = new uint256[](10);
+        for (uint256 i = 0; i < 10; i++) {
+            gameIds[i] = i;
+        }
+
+        vm.warp(block.timestamp + 3601);
+
+        vm.prank(triviaGameHub.owner());
+        triviaGameHub.fulfillWinnersForGames(gameIds);
+
+        console.log("winner with game id 0: ", triviaGameHub.getGameWinner(0));
+        console.log("winner with game id 1: ", triviaGameHub.getGameWinner(1));
+        console.log("winner with game id 2: ", triviaGameHub.getGameWinner(2));
+        console.log("winner with game id 3: ", triviaGameHub.getGameWinner(3));
+        console.log("winner with game id 4: ", triviaGameHub.getGameWinner(4));
     }
 }

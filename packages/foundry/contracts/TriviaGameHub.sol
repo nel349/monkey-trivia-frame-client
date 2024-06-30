@@ -32,7 +32,7 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
     event GameCreated(uint256 indexed gameId, uint256 startTime, uint256 endTime);
     event ParticipantJoinedGame(uint256 indexed gameId, address indexed participant);
     event GameEnded(uint256 indexed gameId);
-    event WinnerFulfilled(uint256 indexed gameId, uint256 indexed winnerIndex);
+    event WinnerFulfilled(uint256 indexed gameId, address indexed winnerIndex);
     event NFTClaimed(uint256 indexed gameId, address indexed winner);
     event NFTReclaimed(uint256 indexed gameId, address indexed winner);
     event NFTDeposited(
@@ -241,16 +241,39 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
     // This is an alternate fulfillWinner getting random number from service
     // Single winner only
     function fulfillWinnerMt(
-        uint256 _gameId,
-        uint256 winnerIndex
-    ) external onlyOwner {
-        require(games[_gameId].isActive == false, "Game is still active.");
+        uint256 _gameId
+    ) public onlyOwner {
+        require(games[_gameId].isActive == false || block.timestamp > games[_gameId].endTime, "Game is still active or not ended yet.");
         require(games[_gameId].participants.length > 0, "No participants found.");
         require(games[_gameId].winners.length == 0, "Winners already found.");
-        require(winnerIndex < games[_gameId].participants.length, "Winner index out of bounds");
-        
-        games[_gameId].winners.push(games[_gameId].participants[winnerIndex]);
-        emit WinnerFulfilled(_gameId, winnerIndex);
+
+        // set the winner to the participant with the highest score
+        // if several tie get the top one
+
+        // get participants for the game
+        address[] memory participants = games[_gameId].participants;
+
+        // get the scores for the participants and get the highest score
+
+        uint256 highestScore = 0;
+        address winner = address(0);
+        for (uint256 i = 0; i < participants.length; i++) {
+            uint256 score = getGameParticipantScore(_gameId, participants[i]);
+            if (score > highestScore) {
+                highestScore = score;
+                winner = participants[i];
+            }
+        }
+        games[_gameId].winners.push(winner);
+
+        emit WinnerFulfilled(_gameId, winner);
+    }
+
+    // fullfill winners for given all given games
+    function fulfillWinnersForGames(uint256[] memory _gameIds) external onlyOwner {
+        for (uint256 i = 0; i < _gameIds.length; i++) {
+            fulfillWinnerMt(_gameIds[i]);
+        }
     }
 
 
@@ -324,11 +347,11 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         emit CheckedUpkeep(isActive, timePassed, hasPlayers, block_t);
     }
 
-    function createGame(uint256 _startTime, uint256 _endTime) public {
+    function createGame(uint256 _startTime, uint256 _endTime) public returns (uint256) {
         require(_endTime > _startTime, "End time must be after start time.");
         
-
-        Game storage newGame = games[nextGameId];
+        uint256 currentGameId = nextGameId;
+        Game storage newGame = games[currentGameId];
         newGame.creator = msg.sender;
         newGame.startTime = _startTime;
         newGame.endTime = _endTime;
@@ -336,17 +359,18 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         newGame.participants = new address[](0);
         newGame.winners = new address[](0);
 
-        emit GameCreated(nextGameId, _startTime, _endTime);
+        emit GameCreated(currentGameId, _startTime, _endTime);
 
         nextGameId++;
+        return currentGameId;
     }
 
-    function createGameWithInterval(uint256 _interval) public {
+    function createGameWithInterval(uint256 _interval) public returns (uint256) {
         createGame(block.timestamp, block.timestamp + _interval);
         i_interval = _interval;
     }
 
-    function createGameDefault() public {
+    function createGameDefault() public returns (uint256) {
         createGame(block.timestamp, block.timestamp + 3600);
     }
 
@@ -409,8 +433,8 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
     }
 
     // Get game score for a participant
-    function getGameParticipantScore(uint256 gameId, address participant) public view returns (string memory) {
-        return games[gameId].scores[participant];
+    function getGameParticipantScore(uint256 gameId, address participant) public view returns (uint256) {
+        return stringToUint(games[gameId].scores[participant]);
     }
 
     // Get participants of a game
@@ -458,24 +482,44 @@ contract TriviaGameHub is FunctionsClient, TriviaGameVrf, AutomationCompatibleIn
         return games[gameId].winners;
     }
 
-    // get all expired games
-    function getExpiredGames() public view returns (uint256[] memory) {
-    uint256 count = 0;
-    for (uint256 i = 0; i < nextGameId; i++) {
-        if (block.timestamp > games[i].endTime) {
-            count++;
-        }
+    // get game winner
+    function getGameWinner(uint256 gameId) public view returns (address) {
+        return games[gameId].winners[0];
     }
 
-    uint256[] memory expiredGames = new uint256[](count);
-    uint256 index = 0;
-    for (uint256 i = 0; i < nextGameId; i++) {
-        if (block.timestamp > games[i].endTime) {
-            expiredGames[index] = i;
-            index++;
+    // get all expired games
+    function getExpiredGames() public view returns (uint256[] memory) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < nextGameId; i++) {
+            if (block.timestamp > games[i].endTime) {
+                count++;
+            }
         }
-    }
+
+        uint256[] memory expiredGames = new uint256[](count);
+        uint256 index = 0;
+        for (uint256 i = 0; i < nextGameId; i++) {
+            if (block.timestamp > games[i].endTime) {
+                expiredGames[index] = i;
+                index++;
+            }
+        }
 
         return expiredGames;
     }
+
+    function stringToUint(string memory s) internal pure returns (uint256) {
+        bytes memory b = bytes(s);
+        uint256 result = 0;
+        for (uint256 i = 0; i < b.length; i++) {
+            if (b[i] >= 0x30 && b[i] <= 0x39) {
+                result = result * 10 + (uint256(uint8(b[i])) - 48);
+            } else {
+                revert("Invalid character in string");
+            }
+        }
+    return result;
+    }
+
+
 }
